@@ -17,7 +17,7 @@ class TestPlanningGraphLevels(unittest.TestCase):
         self.p = have_cake()
         self.pg = PlanningGraph(self.p, self.p.initial)
 
-    # @unittest.skip("test_add_action_level")
+    @unittest.skip("test_add_action_level")
     def test_add_action_level(self):
         # for level, nodeset in enumerate(self.pg.a_levels):
         #     for node in nodeset:
@@ -25,7 +25,7 @@ class TestPlanningGraphLevels(unittest.TestCase):
         self.assertEqual(len(self.pg.a_levels[0]), 3, len(self.pg.a_levels[0]))
         self.assertEqual(len(self.pg.a_levels[1]), 6, len(self.pg.a_levels[1]))
 
-    @unittest.skip("test_add_literal_level")
+    # @unittest.skip("test_add_literal_level")
     def test_add_literal_level(self):
         # for level, nodeset in enumerate(self.pg.s_levels):
         #     for node in nodeset:

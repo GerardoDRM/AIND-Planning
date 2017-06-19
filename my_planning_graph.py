@@ -328,23 +328,18 @@ class PlanningGraph():
         :return:
             adds S nodes to the current level in self.s_levels[level]
         """
-        # TODO add literal S level to the planning graph as described in the Russell-Norvig text
-        # 1. determine what literals to add
-        # 2. connect the nodes
-        # for example, every A node in the previous level has a list of S nodes in effnodes that represent the effect
-        #   produced by the action.  These literals will all be part of the new S level.  Since we are working with sets, they
-        #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
-        #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
-        #   parent sets of the S nodes
-        previous_a_level = self.a_levels[level - 1] # Previous action level (previous to this level of states)
-        self.s_levels.append(set()) # Initialize this level of states
-        for a_node in previous_a_level:
-            for effect_node in a_node.effnodes:
-                # Connect state level to action and vice-versa
-                a_node.children.add(effect_node)
-                effect_node.parents.add(a_node)
-                # Add newly state to this new level of states
-                self.s_levels[level].add(effect_node)
+        # Get previous A nodes
+        previous_a_nodes = self.a_levels[level-1]
+        self.s_levels.append(set())
+        # Each A node has effects produced by the node A action
+        for a_node in previous_a_nodes:
+            # Go through S nodes
+            for effect in a_node.effnodes:
+                # Connect all the new S nodes as children of all the A nodes
+                a_node.children.add(effect)
+                # Connect to parent
+                effect.parents.add(a_node)
+                self.s_levels[level].add(effect)
 
 
     def update_a_mutex(self, nodeset):
