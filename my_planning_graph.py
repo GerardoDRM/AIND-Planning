@@ -1,7 +1,7 @@
 from aimacode.planning import Action
 from aimacode.search import Problem
 from aimacode.utils import expr
-from lp_utils import decode_state
+from lp_utils import decode_state, encode_state
 
 
 class PgNode():
@@ -311,7 +311,8 @@ class PlanningGraph():
         prev_s_level = self.s_levels[level]
         # Get all possible actions
         actions = self.all_actions
-        self.a_levels.append(set())  # Initialize this level of actions
+        # Initialize this level of actions
+        self.a_levels.append(set())
 
         # 1. determine what actions to add and create those PgNode_a objects
         for a in actions:
@@ -441,24 +442,14 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
-
-        test = [a.action.precond_pos[0] for a in node_a1.mutex if a.action.precond_pos]
-        test3 = [a.action.precond_neg[0] for a in node_a1.mutex if a.action.precond_neg]
-
-        # Node A mutex
-        # Get all mutex nodes preconditons on the first node
-        a_mutex_nodes = set([a.action.precond_pos[0] for a in node_a1.mutex if a.action.precond_pos]) | set([a.action.precond_neg[0] for a in node_a1.mutex if a.action.precond_neg])
-        a2_preconditions = set(node_a2.action.precond_pos) | set(node_a2.action.precond_neg)
-        # Node B mutex
-        # Get all mutex nodes preconditons on the second node
-        a2_mutex_nodes = set([a.action.precond_pos[0] for a in node_a2.mutex if a.action.precond_pos]) | set([a.action.precond_neg[0] for a in node_a2.mutex if a.action.precond_neg])
-        a1_preconditions = set(node_a1.action.precond_pos) | set(node_a1.action.precond_neg)
-
-        # Validate if exists and intersection
-        if (a_mutex_nodes & a2_preconditions) or (a2_mutex_nodes & a1_preconditions):
-            return True
-
+        # A parent node is a precondition of an action
+        # We check each precondition combination if is a mutex
+        for p1 in node_a1.parents:
+            for p2 in node_a2.parents:
+                if p1.is_mutex(p2):
+                    return True
         return False
+
 
     def update_s_mutex(self, nodeset: set):
         """ Determine and update sibling mutual exclusion for S-level nodes
@@ -492,8 +483,8 @@ class PlanningGraph():
         :param node_s2: PgNode_s
         :return: bool
         """
-        # TODO test for negation between nodes
-        return False
+        # Check if node a is the negation of node b
+        return isinstance(node_s1, node_s2.__class__) and node_s1.symbol == node_s2.symbol and node_s1.is_pos != node_s2.is_pos
 
     def inconsistent_support_mutex(self, node_s1: PgNode_s, node_s2: PgNode_s):
         """
@@ -511,8 +502,15 @@ class PlanningGraph():
         :param node_s2: PgNode_s
         :return: bool
         """
-        # TODO test for Inconsistent Support between nodes
-        return False
+        # We have a literal node so we need its parent in order to
+        # get the action that produce this effect and validate all possible combinations
+        # to get if two nodes are mutually exclusive
+        for na_1 in node_s1.parents:
+            for na_2 in node_s2.parents:
+                if not na_1.is_mutex(na_2):
+                    return False
+
+        return True
 
     def h_levelsum(self) -> int:
         """The sum of the level costs of the individual goals (admissible if goals independent)
@@ -520,7 +518,14 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
-        # TODO implement
-        # for each goal in the problem, determine the level cost, then add them
-        # together
+        # Iterate over individual goal
+        for goal in self.problem.goal:
+            # Convert to node for easy search
+            node = PgNode_s(goal, True)
+            # Check on which level is the node if exists
+            for idx, level in enumerate(self.s_levels):
+                if node in level:
+                    level_sum+=idx
+                    break
+        # Return level cost
         return level_sum

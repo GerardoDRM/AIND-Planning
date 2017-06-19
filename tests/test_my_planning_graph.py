@@ -17,7 +17,6 @@ class TestPlanningGraphLevels(unittest.TestCase):
         self.p = have_cake()
         self.pg = PlanningGraph(self.p, self.p.initial)
 
-    @unittest.skip("test_add_action_level")
     def test_add_action_level(self):
         # for level, nodeset in enumerate(self.pg.a_levels):
         #     for node in nodeset:
@@ -25,7 +24,6 @@ class TestPlanningGraphLevels(unittest.TestCase):
         self.assertEqual(len(self.pg.a_levels[0]), 3, len(self.pg.a_levels[0]))
         self.assertEqual(len(self.pg.a_levels[1]), 6, len(self.pg.a_levels[1]))
 
-    @unittest.skip("test_add_literal_level")
     def test_add_literal_level(self):
         # for level, nodeset in enumerate(self.pg.s_levels):
         #     for node in nodeset:
@@ -61,7 +59,6 @@ class TestPlanningGraphMutex(unittest.TestCase):
         self.na1.parents.add(self.ns3)
         self.na2.parents.add(self.ns4)
 
-    @unittest.skip("test_serialize_mutex")
     def test_serialize_mutex(self):
         self.assertTrue(PlanningGraph.serialize_actions(self.pg, self.na1, self.na2),
                         "Two persistence action nodes not marked as mutex")
@@ -69,14 +66,12 @@ class TestPlanningGraphMutex(unittest.TestCase):
         self.assertFalse(PlanningGraph.serialize_actions(self.pg, self.na1, self.na3),
                          "No-op and persistence action incorrectly marked as mutex")
 
-    @unittest.skip("test_inconsistent_effects_mutex")
     def test_inconsistent_effects_mutex(self):
         self.assertTrue(PlanningGraph.inconsistent_effects_mutex(self.pg, self.na4, self.na5),
                         "Canceling effects not marked as mutex")
         self.assertFalse(PlanningGraph.inconsistent_effects_mutex(self.pg, self.na1, self.na2),
                          "Non-Canceling effects incorrectly marked as mutex")
 
-    @unittest.skip("test_interference_mutex")
     def test_interference_mutex(self):
         self.assertTrue(PlanningGraph.interference_mutex(self.pg, self.na4, self.na5),
                         "Precondition from one node opposite of effect of other node should be mutex")
@@ -85,22 +80,19 @@ class TestPlanningGraphMutex(unittest.TestCase):
         self.assertFalse(PlanningGraph.interference_mutex(self.pg, self.na1, self.na2),
                          "Non-interfering incorrectly marked mutex")
 
-    # @unittest.skip("test_competing_needs_mutex")
     def test_competing_needs_mutex(self):
         self.assertFalse(PlanningGraph.competing_needs_mutex(self.pg, self.na1, self.na2),
                          "Non-competing action nodes incorrectly marked as mutex")
-        # mutexify(self.ns3, self.ns4)
-        # self.assertTrue(PlanningGraph.competing_needs_mutex(self.pg, self.na1, self.na2),
-        #                 "Opposite preconditions from two action nodes not marked as mutex")
+        mutexify(self.ns3, self.ns4)
+        self.assertTrue(PlanningGraph.competing_needs_mutex(self.pg, self.na1, self.na2),
+                        "Opposite preconditions from two action nodes not marked as mutex")
 
-    @unittest.skip("test_negation_mutex")
     def test_negation_mutex(self):
         self.assertTrue(PlanningGraph.negation_mutex(self.pg, self.ns1, self.ns3),
                         "Opposite literal nodes not found to be Negation mutex")
         self.assertFalse(PlanningGraph.negation_mutex(self.pg, self.ns1, self.ns2),
                          "Same literal nodes found to be Negation mutex")
 
-    @unittest.skip("test_inconsistent_support_mutex")
     def test_inconsistent_support_mutex(self):
         self.assertFalse(PlanningGraph.inconsistent_support_mutex(self.pg, self.ns1, self.ns2),
                          "Independent node paths should NOT be inconsistent-support mutex")
@@ -127,7 +119,7 @@ class TestPlanningGraphHeuristics(unittest.TestCase):
     def setUp(self):
         self.p = have_cake()
         self.pg = PlanningGraph(self.p, self.p.initial)
-    @unittest.skip("test_levelsum")
+
     def test_levelsum(self):
         self.assertEqual(self.pg.h_levelsum(), 1)
 
