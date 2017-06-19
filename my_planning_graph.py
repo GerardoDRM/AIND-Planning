@@ -442,7 +442,22 @@ class PlanningGraph():
         :return: bool
         """
 
-        # TODO test for Competing Needs between nodes
+        test = [a.action.precond_pos[0] for a in node_a1.mutex if a.action.precond_pos]
+        test3 = [a.action.precond_neg[0] for a in node_a1.mutex if a.action.precond_neg]
+
+        # Node A mutex
+        # Get all mutex nodes preconditons on the first node
+        a_mutex_nodes = set([a.action.precond_pos[0] for a in node_a1.mutex if a.action.precond_pos]) | set([a.action.precond_neg[0] for a in node_a1.mutex if a.action.precond_neg])
+        a2_preconditions = set(node_a2.action.precond_pos) | set(node_a2.action.precond_neg)
+        # Node B mutex
+        # Get all mutex nodes preconditons on the second node
+        a2_mutex_nodes = set([a.action.precond_pos[0] for a in node_a2.mutex if a.action.precond_pos]) | set([a.action.precond_neg[0] for a in node_a2.mutex if a.action.precond_neg])
+        a1_preconditions = set(node_a1.action.precond_pos) | set(node_a1.action.precond_neg)
+
+        # Validate if exists and intersection
+        if (a_mutex_nodes & a2_preconditions) or (a2_mutex_nodes & a1_preconditions):
+            return True
+
         return False
 
     def update_s_mutex(self, nodeset: set):
